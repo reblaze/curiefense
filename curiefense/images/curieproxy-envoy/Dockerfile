@@ -2,7 +2,7 @@ FROM envoyproxy/envoy:v1.16-latest as builder
 
 RUN apt-get update && \
     apt-get -yq --no-install-recommends install libhyperscan-dev make gcc curl libc6-dev pkg-config \
-                                                lua5.1 luajit liblua5.1-dev && \
+                                                lua5.1 luajit liblua5.1-dev g++ && \
 	rm -rf /var/lib/apt/lists/*
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
