@@ -19,7 +19,7 @@ URLMap          = nil
 ACLProfiles     = nil
 WAFProfiles     = nil
 WAFSignatures   = nil
--- WAFRustSignatures   = iptools.new_sig_set()
+WAFRustSignatures   = iptools.new_sig_set()
 -- hyperscan
 WAFHScanDB      = nil
 WAFHScanScratch = nil
@@ -221,6 +221,18 @@ function build_hs_db( signatures )
     WAFHScanScratch = WAFHScanDB:makeScratch()
 end
 
+function build_hsrust_db( signatures )
+
+    WAFRustSignatures:clear()
+
+    for id, sig  in pairs(signatures) do
+        WAFRustSignatures:add(sig.operand,sig.id)
+    end
+
+    WAFRustSignatures:compile()
+
+end
+
 function maybe_reload(handle)
     -- handle:logDebug("MAYBE_RELOAD CONFIG ENTERED")
     local fname
@@ -237,7 +249,7 @@ function maybe_reload(handle)
         WAFSignatures   = lr(handle,  "/config/current/config/json/waf-signatures.json")
 
         build_hs_db(WAFSignatures)
-
+        build_hsrust_db(WAFSignatures)
 
     end
 
