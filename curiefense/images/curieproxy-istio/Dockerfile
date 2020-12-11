@@ -1,3 +1,14 @@
+FROM envoyproxy/envoy:v1.16-latest as builder
+
+RUN apt-get update && \
+    apt-get -yq --no-install-recommends install libhyperscan-dev make gcc curl libc6-dev pkg-config \
+                                                lua5.1 luajit liblua5.1-dev g++ && \
+	rm -rf /var/lib/apt/lists/*
+
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+COPY iptools/ /iptools/
+RUN bash -c "source $HOME/.cargo/env ; cd /iptools ; make -B"
+
 FROM docker.io/istio/proxyv2:1.5.10
 
 RUN apt-get update && \
@@ -20,6 +31,7 @@ COPY curieproxy/envoy-1.13.4 /usr/local/bin/envoy
 COPY init/start_curiefense_pilot.sh /start_curiefense_pilot.sh
 COPY curieproxy/lua /lua
 COPY curieproxy/lua/shared-objects/*.so /usr/local/lib/lua/5.1/
+COPY --from=builder /iptools/iptools.so /usr/local/lib/lua/5.1/
 COPY curieproxy/config /bootstrap-config/config
 
 RUN mkdir /config && chmod a+rwxt /config
